@@ -1,9 +1,9 @@
 from random import choices
-from string import ascii_letters, digits
 
 from flask import flash, redirect, render_template
 
 from . import app, db
+from .constants import SHORT_LINK_SIMBOLS
 from .forms import URLMapForm
 from .models import URLMap
 
@@ -12,7 +12,7 @@ LINK_EXISTS = 'Предложенный вариант короткой ссыл
 
 
 def get_unique_short_id():
-    return ''.join(choices(ascii_letters + digits, k=6))
+    return ''.join(choices(SHORT_LINK_SIMBOLS, k=6))
 
 
 @app.route('/', methods=['GET', 'POST'])

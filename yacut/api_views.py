@@ -24,7 +24,7 @@ def short_link():
     if data.get('custom_id'):
         if URLMap.query.filter_by(short=data['custom_id']).first():
             raise APIException(SHORT_LINK)
-        if len(data['custom_id']) > 16 or not re.match(r'^[a-zA-Z0-9]+$', data['custom_id']):
+        if not re.match(r'^[a-zA-Z0-9]{1,16}$', data['custom_id']):
             raise APIException(SHORT_LINK_NAME)
     else:
         data['custom_id'] = get_unique_short_id()
