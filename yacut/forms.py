@@ -2,21 +2,34 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, URLField
 from wtforms.validators import URL, DataRequired, Length, Optional, Regexp
 
+from .models import URLMap
+
+from .constants import MAX_LEN_SHORT, SHORT_LINK_SIMBOLS
+
 CUSTOM_ID = 'Ссылка должна состоять из латинских букв и цифр в диапазоне от 0 до 9'
-REGULAR_EXPR = '^[a-zA-Z0-9]+$'
+REGULAR_EXPR = f'^[{SHORT_LINK_SIMBOLS}]+$'
 MESSAGE_FIELD = 'Обязательное поле'
+LABEL_ORIGINAL_LINK = 'Введите ссылку'
+LABEL_CUSTOM_ID = 'Введите короткую ссылку'
+LABEL_SUBMIT = 'Создать'
 
 
 class URLMapForm(FlaskForm):
     original_link = URLField(
-        'Введите ссылку',
-        validators=[DataRequired(message=MESSAGE_FIELD), URL()]
+        LABEL_ORIGINAL_LINK,
+        validators=[
+            DataRequired(message=MESSAGE_FIELD),
+            URL(),
+            Length(max=2000)]
     )
     custom_id = StringField(
-        'Введите короткую ссылку',
+        LABEL_CUSTOM_ID,
         validators=[
             Regexp(REGULAR_EXPR, message=CUSTOM_ID),
-            Length(0, 16),
+            Length(max=MAX_LEN_SHORT),
             Optional()
         ])
-    submit = SubmitField('Создать')
+    submit = SubmitField(LABEL_SUBMIT)
+
+    def validate_custom_id(self, field):
+        return not URLMap.query.filter_by(short=field.data).count()
