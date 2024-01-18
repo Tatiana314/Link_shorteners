@@ -1,8 +1,9 @@
+from http import HTTPStatus
 import re
 
 from flask import jsonify, request, url_for
 
-from . import app, db
+from . import app
 from .error_handlers import APIException
 from .models import URLMap
 from .views import get_unique_short_id
@@ -28,22 +29,19 @@ def short_link():
             raise APIException(SHORT_LINK_NAME)
     else:
         data['custom_id'] = get_unique_short_id()
-        while URLMap.query.filter_by(short=data['custom_id']).count():
-            data['custom_id'] = get_unique_short_id()
     url_map = URLMap()
     url_map.from_dict(data)
-    db.session.add(url_map)
-    db.session.commit()
+    url_map.save()
     return jsonify(
         {
             'short_link': url_for('original_link_view', short=url_map.short, _external=True),
             'url': url_map.original
-        }), 201
+        }),  HTTPStatus.CREATED
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
 def get_original_link(short_id):
     original_link = URLMap.query.filter_by(short=short_id).first()
     if original_link:
-        return jsonify({'url': original_link.original}), 200
-    raise APIException(OBJECT_ERROE, 404)
+        return jsonify({'url': original_link.original}), HTTPStatus.OK
+    raise APIException(OBJECT_ERROE, HTTPStatus.NOT_FOUND)

@@ -31,5 +31,5 @@ class URLMapForm(FlaskForm):
         ])
     submit = SubmitField(LABEL_SUBMIT)
 
-    def validate_custom_id(self, field):
-        return not URLMap.query.filter_by(short=field.data).count()
+    def validate_custom_id(self, form):
+        return not URLMap.query.filter_by(short=self.custom_id.data).count()
