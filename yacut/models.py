@@ -22,6 +22,14 @@ class URLMap(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    @classmethod
+    def save_link(cls, short, original):
+        url_map = cls(original=original, short=short)
+        db.session.add(url_map)
+        db.session.commit()
+        return url_map
+
+
 
     # @cmethod
     # def norm2(short, original):
