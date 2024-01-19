@@ -1,19 +1,13 @@
-from random import choices
 from flask import flash, redirect, render_template, url_for
 
 from . import app
-from .constants import LEN_SHORT, ORIGINAL_LINK_VIEW, SHORT_LINK_SIMBOLS
+from .constants import LINK_CREATED, ORIGINAL_LINK_VIEW
 from .forms import URLMapForm
 from .models import URLMap
 
-LINK_CREATED = 'Ваша новая ссылка готова'
-
 
 def get_unique_short_id():
-    short = ''.join(choices(SHORT_LINK_SIMBOLS, k=LEN_SHORT))
-    while URLMap.query.filter_by(short=short).count():
-        short = ''.join(choices(SHORT_LINK_SIMBOLS, k=LEN_SHORT))
-    return short
+    return URLMap.get_unique_short()
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -21,7 +15,7 @@ def index_view():
     form = URLMapForm()
     if form.validate_on_submit():
         if not form.custom_id.data:
-            form.custom_id.data = get_unique_short_id()
+            form.custom_id.data = URLMap.get_unique_short()
         flash(LINK_CREATED)
         return render_template(
             'index.html',
@@ -38,4 +32,6 @@ def index_view():
 
 @app.route('/<string:short>')
 def original_link_view(short):
-    return redirect(URLMap.query.filter_by(short=short).first_or_404().original)
+    return redirect(
+        URLMap.query.filter_by(short=short).first_or_404().original
+    )
