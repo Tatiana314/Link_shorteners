@@ -3,9 +3,13 @@ from http import HTTPStatus
 from flask import jsonify, request, url_for
 
 from . import app
-from .constants import OBJECT_ERROE, ORIGINAL_LINK_VIEW, REQUEST_ERROR, URL
+from .constants import ORIGINAL_LINK_VIEW
 from .error_handlers import APIException
 from .models import URLMap
+
+OBJECT_ERROR = 'Указанный id не найден'
+REQUEST_ERROR = 'Отсутствует тело запроса'
+URL = '"url" является обязательным полем!'
 
 
 @app.route('/api/id/', methods=['POST'])
@@ -16,7 +20,9 @@ def short_link():
     if 'url' not in data:
         raise APIException(URL)
     try:
-        url_map = URLMap.validate_on_save(short=data.get('custom_id'), original=data['url'])
+        url_map = URLMap.save(
+            short=data.get('custom_id'), original=data['url']
+        )
         return jsonify(
             {
                 'short_link': url_for(
@@ -35,4 +41,4 @@ def get_original_link(short_id):
     url_map = URLMap.get_object(short=short_id)
     if url_map:
         return jsonify({'url': url_map.original}), HTTPStatus.OK
-    raise APIException(OBJECT_ERROE, HTTPStatus.NOT_FOUND)
+    raise APIException(OBJECT_ERROR, HTTPStatus.NOT_FOUND)

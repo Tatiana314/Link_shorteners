@@ -4,8 +4,10 @@ from random import choices
 
 from . import db
 from .constants import (LEN_SHORT, LINK_EXISTS, MAX_LEN_ORIGINAL_LINK,
-                        MAX_LEN_SHORT, SHORT_LINK_NAME, SHORT_LINK_SIMBOLS)
+                        MAX_LEN_SHORT, QUANTITY_OF_ITERATIONS,
+                        SHORT_LINK_SIMBOLS)
 
+SHORT_LINK_NAME = 'Указано недопустимое имя для короткой ссылки'
 FIELD_LENGTH_ERROR = (
     'Поле должно содержать не более {MAX_LEN_ORIGINAL_LINK} символов.'
 )
@@ -21,30 +23,19 @@ class URLMap(db.Model):
         return f'{self.id}, {self.original}, {self.short}, {self.timestamp}'
 
     @staticmethod
-    def save_link(short, original):
-        url_map = URLMap(original=original, short=short)
-        db.session.add(url_map)
-        db.session.commit()
-        return url_map
-    
-    @staticmethod
-    def save(url_map):
-        db.session.add(url_map)
-        db.session.commit()
-
-    @staticmethod
     def get_object(short):
         return URLMap.query.filter_by(short=short).first()
 
     @staticmethod
-    def get_unique_short():
-        short = ''.join(choices(SHORT_LINK_SIMBOLS, k=LEN_SHORT))
-        while URLMap.query.filter_by(short=short).count():
+    def get_unique_short_id():
+        for _ in range(QUANTITY_OF_ITERATIONS):
             short = ''.join(choices(SHORT_LINK_SIMBOLS, k=LEN_SHORT))
+            if URLMap.get_object(short=short):
+                break
         return short
 
     @staticmethod
-    def validate_on_save(short, original):
+    def save(short, original):
         if len(original) > MAX_LEN_ORIGINAL_LINK:
             raise ValueError(FIELD_LENGTH_ERROR)
         if short:
@@ -54,9 +45,11 @@ class URLMap(db.Model):
                     not re.match(f'^[{SHORT_LINK_SIMBOLS}]+$', short)):
                 raise ValueError(SHORT_LINK_NAME)
         else:
-            short = URLMap.get_unique_short()
-        url_map = URLMap.save_link(
+            short = URLMap.get_unique_short_id()
+        url_map = URLMap(
             original=original,
             short=short
         )
+        db.session.add(url_map)
+        db.session.commit()
         return url_map

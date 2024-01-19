@@ -3,7 +3,7 @@
 Проект YaCut — это сервис укорачивания ссылок. Его назначение — ассоциировать длинную пользовательскую ссылку с короткой, которую предлагает сам пользователь или предоставляет сервис.
 
 ## Технологии
-- Python 3.10
+- Python 3.9
 - Flask 2.0
 - Jinja2 3.0
 - SQLAlchemy 1.4
@@ -59,6 +59,18 @@ FLASK_APP=yacut
 FLASK_ENV=production
 DATABASE_URI=<sqlite:///db.sqlite3>
 SECRET_KEY=<SECRET_KEY>
+```
+
+Создать миграции:
+
+```
+flask db migrate
+```
+
+Создать базу данных:
+
+```
+flask db upgrade
 ```
 
 Запустить:
