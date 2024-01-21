@@ -3,15 +3,21 @@ from datetime import datetime
 from random import choices
 
 from . import db
-from .constants import (ITERATIONS, LEN_SHORT, MAX_LEN_ORIGINAL_LINK,
-                        MAX_LEN_SHORT, REGEX, SHORT_LINK_SIMBOLS)
+from .constants import (
+    ITERATIONS,
+    LEN_SHORT,
+    MAX_LEN_ORIGINAL_LINK,
+    MAX_LEN_SHORT,
+    REGEX,
+    SHORT_LINK_SIMBOLS,
+)
 
 FIELD_LENGTH_ERROR = (
-    'Поле должно содержать не более {MAX_LEN_ORIGINAL_LINK} символов.'
+    "Поле должно содержать не более {MAX_LEN_ORIGINAL_LINK} символов."
 )
-GENERATION = 'Превышен лимит генерации короткой ссылки.'
-LINK_EXISTS = 'Предложенный вариант короткой ссылки уже существует.'
-SHORT_LINK_NAME = 'Указано недопустимое имя для короткой ссылки'
+GENERATION = "Превышен лимит генерации короткой ссылки."
+LINK_EXISTS = "Предложенный вариант короткой ссылки уже существует."
+SHORT_LINK_NAME = "Указано недопустимое имя для короткой ссылки"
 
 
 class URLMap(db.Model):
@@ -21,7 +27,7 @@ class URLMap(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def __str__(self):
-        return f'{self.id}, {self.original}, {self.short}, {self.timestamp}'
+        return f"{self.id}, {self.original}, {self.short}, {self.timestamp}"
 
     @staticmethod
     def get(short):
@@ -34,7 +40,7 @@ class URLMap(db.Model):
     @staticmethod
     def get_unique_short_id():
         for _ in range(ITERATIONS):
-            short = ''.join(choices(SHORT_LINK_SIMBOLS, k=LEN_SHORT))
+            short = "".join(choices(SHORT_LINK_SIMBOLS, k=LEN_SHORT))
             if URLMap.get(short=short):
                 break
         if short:
@@ -46,8 +52,9 @@ class URLMap(db.Model):
         if api and len(original) > MAX_LEN_ORIGINAL_LINK:
             raise ValueError(FIELD_LENGTH_ERROR)
         if short:
-            if api and (len(short) > MAX_LEN_SHORT or
-                not re.match(REGEX, short)):
+            if api and (
+                len(short) > MAX_LEN_SHORT or not re.match(REGEX, short)
+            ):
                 raise ValueError(SHORT_LINK_NAME)
             if api and URLMap.get(short=short):
                 raise ValueError(LINK_EXISTS)
