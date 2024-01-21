@@ -20,25 +20,25 @@ def short_link():
     if 'url' not in data:
         raise APIException(URL)
     try:
-        url_map = URLMap.save(
-            short=data.get('custom_id'), original=data['url']
-        )
         return jsonify(
             {
                 'short_link': url_for(
                     ORIGINAL_LINK_VIEW,
-                    short=url_map.short,
+                    short=URLMap.save(
+                        short=data.get('custom_id'),
+                        original=data['url']
+                    ).short,
                     _external=True
                 ),
-                'url': url_map.original
+                'url': data.get('url')
             }), HTTPStatus.CREATED
     except Exception as error:
-        return jsonify({'message': str(error)}), HTTPStatus.BAD_REQUEST
+        raise APIException(str(error), HTTPStatus.BAD_REQUEST)
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
 def get_original_link(short_id):
-    url_map = URLMap.get_object(short=short_id)
+    url_map = URLMap.get(short=short_id)
     if url_map:
         return jsonify({'url': url_map.original}), HTTPStatus.OK
     raise APIException(OBJECT_ERROR, HTTPStatus.NOT_FOUND)

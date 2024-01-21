@@ -11,23 +11,23 @@ def index_view():
     form = URLMapForm()
     if not form.validate_on_submit():
         return render_template('index.html', form=form)
-    url_map = URLMap.save(
-        original=form.original_link.data,
-        short=form.custom_id.data
-    )
-    return render_template(
-        'index.html',
-        form=form,
-        url_short=url_for(
-            ORIGINAL_LINK_VIEW,
-            short=url_map.short,
-            _external=True
-        ))
+    try:
+        return render_template(
+            'index.html',
+            form=form,
+            url_short=url_for(
+                ORIGINAL_LINK_VIEW,
+                short=URLMap.save(
+                    original=form.original_link.data,
+                    short=form.custom_id.data,
+                    api=False
+                ).short,
+                _external=True
+            ))
+    except Exception:
+        abort(404)
 
 
 @app.route('/<string:short>')
 def original_link_view(short):
-    url_map = URLMap.get_object(short=short)
-    if url_map:
-        return redirect(url_map.original)
-    abort(404)
+    return redirect(URLMap.get_or_404(short=short).original)

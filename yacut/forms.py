@@ -2,8 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, URLField, ValidationError
 from wtforms.validators import URL, DataRequired, Length, Optional, Regexp
 
-from .constants import (LINK_EXISTS, MAX_LEN_ORIGINAL_LINK, MAX_LEN_SHORT,
-                        SHORT_LINK_SIMBOLS)
+from .constants import MAX_LEN_ORIGINAL_LINK, MAX_LEN_SHORT, REGEX
 from .models import URLMap
 
 CUSTOM_ID = (
@@ -14,6 +13,7 @@ MESSAGE_FIELD = 'Обязательное поле'
 LABEL_ORIGINAL_LINK = 'Введите ссылку'
 LABEL_CUSTOM_ID = 'Введите короткую ссылку'
 LABEL_SUBMIT = 'Создать'
+LINK_EXISTS = 'Предложенный вариант короткой ссылки уже существует.'
 
 
 class URLMapForm(FlaskForm):
@@ -27,12 +27,12 @@ class URLMapForm(FlaskForm):
     custom_id = StringField(
         LABEL_CUSTOM_ID,
         validators=[
-            Regexp(f'^[{SHORT_LINK_SIMBOLS}]+$', message=CUSTOM_ID),
+            Regexp(REGEX, message=CUSTOM_ID),
             Length(max=MAX_LEN_SHORT),
             Optional()
         ])
     submit = SubmitField(LABEL_SUBMIT)
 
     def validate_custom_id(self, field):
-        if URLMap.get_object(short=field.data):
+        if URLMap.get(short=field.data):
             raise ValidationError(LINK_EXISTS)
