@@ -20,7 +20,7 @@ def index_view():
                 short=URLMap.save(
                     original=form.original_link.data,
                     short=form.custom_id.data,
-                    api=False
+                    validation=False
                 ).short,
                 _external=True
             ))

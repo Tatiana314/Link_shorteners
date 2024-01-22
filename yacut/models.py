@@ -41,22 +41,20 @@ class URLMap(db.Model):
     def get_unique_short_id():
         for _ in range(ITERATIONS):
             short = "".join(choices(SHORT_LINK_SIMBOLS, k=LEN_SHORT))
-            if URLMap.get(short=short):
-                break
-        if short:
-            return short
+            if short and not URLMap.get(short=short):
+                return short
         raise ValueError(GENERATION)
 
     @staticmethod
-    def save(short, original, api=True):
-        if api and len(original) > MAX_LEN_ORIGINAL_LINK:
+    def save(short, original, validation=True):
+        if validation and len(original) > MAX_LEN_ORIGINAL_LINK:
             raise ValueError(FIELD_LENGTH_ERROR)
         if short:
-            if api and (
+            if validation and (
                 len(short) > MAX_LEN_SHORT or not re.match(REGEX, short)
             ):
                 raise ValueError(SHORT_LINK_NAME)
-            if api and URLMap.get(short=short):
+            if validation and URLMap.get(short=short):
                 raise ValueError(LINK_EXISTS)
         else:
             short = URLMap.get_unique_short_id()
