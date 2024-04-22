@@ -20,18 +20,17 @@ def short_link():
     if 'url' not in data:
         raise APIException(URL)
     try:
-        return jsonify(
-            {
-                'short_link': url_for(
-                    ORIGINAL_LINK_VIEW,
-                    short=URLMap.save(
-                        short=data.get('custom_id'),
-                        original=data['url']
-                    ).short,
-                    _external=True
-                ),
-                'url': data.get('url')
-            }), HTTPStatus.CREATED
+        return jsonify({
+            'short_link': url_for(
+                ORIGINAL_LINK_VIEW,
+                short=URLMap.save(
+                    short=data.get('custom_id'),
+                    original=data['url']
+                ).short,
+                _external=True
+        ),
+        'url': data.get('url')
+    }), HTTPStatus.CREATED
     except Exception as error:
         raise APIException(str(error), HTTPStatus.BAD_REQUEST)
 
