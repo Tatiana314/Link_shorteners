@@ -75,6 +75,7 @@ flask db upgrade
 ```
 flask run
 ```
+Сервис будет доступен по адресу `http://localhost:5000/`.
 
 ## Автор
 [Мусатова Татьяна](https://github.com/Tatiana314)
